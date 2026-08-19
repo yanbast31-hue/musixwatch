@@ -1,8 +1,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-<!--  Permission pour lancer un appel téléphonique  -->
-<uses-permission android:name="android.permission.CALL_PHONE"/>
-<!--  Permission pour lire l'état du téléphone (savoir si on est en appel)  -->
-<uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+<!--  Permission pour afficher des notifications (obligatoire depuis Android 13)  -->
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+<!--  Permission pour afficher une notification en plein écran (l'écran d'appel)  -->
+<uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
+<uses-permission android:name="android.permission.VIBRATE"/>
 <application android:allowBackup="true" android:label="Faux Appel" android:supportsRtl="true" android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 <activity android:name=".MainActivity" android:exported="true">
 <intent-filter>
@@ -10,5 +11,9 @@
 <category android:name="android.intent.category.LAUNCHER"/>
 </intent-filter>
 </activity>
+<!--  Écran plein écran qui s'affiche quand la notification d'appel se déclenche  -->
+<activity android:name=".IncomingCallActivity" android:exported="false" android:showWhenLocked="true" android:turnScreenOn="true" android:launchMode="singleTop" android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
+<!--  Reçoit les actions Répondre / Refuser  -->
+<receiver android:name=".CallActionReceiver" android:exported="false"/>
 </application>
 </manifest>
