@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import androidx.core.app.Person
 
 object NotificationHelper {
 
@@ -36,11 +35,6 @@ object NotificationHelper {
     fun afficherAppelEntrant(context: Context) {
         creerChannel(context)
 
-        // La personne qui "appelle" (nom affiché sur l'écran d'appel)
-        val appelant = Person.Builder()
-            .setName("Appel entrant")
-            .build()
-
         // Intent déclenché quand on appuie sur "Répondre"
         val answerIntent = Intent(context, CallActionReceiver::class.java).apply {
             action = ACTION_ANSWER
@@ -59,24 +53,26 @@ object NotificationHelper {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // L'écran plein écran qui s'affiche automatiquement (comme un vrai appel)
+        // On ouvre l'écran plein écran (imitation d'appel) uniquement si on tape sur la notification elle-même
         val fullScreenIntent = Intent(context, IncomingCallActivity::class.java)
-        val fullScreenPendingIntent = PendingIntent.getActivity(
+        val contentPendingIntent = PendingIntent.getActivity(
             context, 2, fullScreenIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
+        // IMPORTANT : notification "classique" (pas de CallStyle, pas de catégorie CALL,
+        // pas de "ongoing") pour que l'app de la montre (Mi Fitness) la relaie normalement,
+        // comme n'importe quelle autre notification.
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.sym_call_incoming)
-            .setStyle(
-                NotificationCompat.CallStyle.forIncomingCall(
-                    appelant, declinePendingIntent, answerPendingIntent
-                )
-            )
-            .setFullScreenIntent(fullScreenPendingIntent, true)
-            .setCategory(NotificationCompat.CATEGORY_CALL)
+            .setContentTitle("Appel entrant")
+            .setContentText("Appuie pour voir l'appel")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setOngoing(true)
+            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+            .setContentIntent(contentPendingIntent)
+            .setAutoCancel(true)
+            .addAction(android.R.drawable.sym_call_incoming, "Répondre", answerPendingIntent)
+            .addAction(android.R.drawable.ic_menu_close_clear_cancel, "Refuser", declinePendingIntent)
             .build()
 
         val manager = context.getSystemService(NotificationManager::class.java)
